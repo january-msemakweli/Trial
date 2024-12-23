@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gloria AI Chat</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .chat-container {
+      width: 100%;
+      max-width: 600px;
+      background: #ffffff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .chat-header {
+      background-color: #4caf50;
+      color: #ffffff;
+      padding: 16px;
+      text-align: center;
+      font-size: 1.25rem;
+      font-weight: bold;
+    }
+
+    .chat-messages {
+      padding: 16px;
+      height: 400px;
+      overflow-y: auto;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .chat-input {
+      display: flex;
+      padding: 16px;
+      gap: 8px;
+      background: #f9f9f9;
+    }
+
+    .chat-input input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .chat-input button {
+      padding: 10px 16px;
+      background-color: #4caf50;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .chat-input button:hover {
+      background-color: #45a049;
+    }
+
+    .message {
+      margin-bottom: 16px;
+    }
+
+    .message.user {
+      text-align: right;
+      color: #4caf50;
+    }
+
+    .message.gloria {
+      text-align: left;
+      color: #333;
+    }
+
+    .message span {
+      display: inline-block;
+      background: #e8e8e8;
+      padding: 10px;
+      border-radius: 4px;
+      max-width: 80%;
+      word-wrap: break-word;
+    }
+
+    .message.user span {
+      background: #d4f7d4;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">Chat with Gloria AI</div>
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-input">
+      <input type="text" id="user-input" placeholder="Type your message here...">
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const backendUrl = "https://gloria-ai.onrender.com/api/chat";
+
+    // Function to send user input to the backend
+    async function sendMessage() {
+      const userInput = document.getElementById("user-input");
+      const chatMessages = document.getElementById("chat-messages");
+      const message = userInput.value.trim();
+
+      if (!message) return;
+
+      // Add user message to chat
+      addMessage("user", message);
+
+      try {
+        // Call backend
+        const response = await fetch(backendUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ message }),
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          // Add Gloria's response to chat
+          addMessage("gloria", data.response);
+        } else {
+          addMessage("gloria", "Oops! Something went wrong. Please try again.");
+        }
+      } catch (error) {
+        addMessage("gloria", "Unable to connect to the server.");
+        console.error("Error:", error);
+      }
+
+      // Clear the input field
+      userInput.value = "";
+    }
+
+    // Function to add messages to the chat
+    function addMessage(sender, text) {
+      const chatMessages = document.getElementById("chat-messages");
+      const messageDiv = document.createElement("div");
+      messageDiv.classList.add("message", sender);
+      messageDiv.innerHTML = `<span>${text}</span>`;
+      chatMessages.appendChild(messageDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+  </script>
+</body>
+</html>
